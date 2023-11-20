@@ -7,10 +7,6 @@ import matplotlib.pyplot as plt
 from tkinter import ttk, filedialog
 from matplotlib.figure import Figure
 from scipy.signal import savgol_filter
-from sklearn.metrics import mean_squared_error
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.model_selection import train_test_split
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 
@@ -33,13 +29,7 @@ class App(tk.Tk):
         self.configure(menu=self.menu)
 
         # Widgets
-        self.label1 = ttk.Label(self)
-        self.label2 = ttk.Label(self)
-        self.label3 = ttk.Label(self)
-        self.label4 = ttk.Label(self)
-        self.label5 = ttk.Label(self)
-        self.label6 = ttk.Label(self)
-        self.label7 = ttk.Label(self)
+        self.labels = [ttk.Label(self) for x in range(7)]
 
         # Extra Window
         self.extra_window = None
@@ -52,25 +42,24 @@ class App(tk.Tk):
             filetypes=[('SM4', '*.SM4')])
         self.file = spym.load(file_path)
 
-        labels = [self.label1, self.label2, self.label3, self.label4, self.label5, self.label6, self.label7]
-
         if self.local_visibility:
-            for label in labels:
+            for label in self.labels:
                 label.pack_forget()
             self.extra_window.destroy()
         self.local_visibility = True
 
-        # Changing labels' content
-        self.label1.configure(text=f"File's name: {self.fetch_filename()}")
-        self.label2.configure(text=f"Picture's size (px): {self.fetch_picture_size()[0]}x{self.fetch_picture_size()[1]}")
-        self.label3.configure(text=f"Picture's size (nm): {self.fetch_picture_size()[2]}")
-        self.label4.configure(text=f"Spectroscopy's first direction: {self.fetch_forward_or_backward()}")
-        self.label5.configure(text=f"Spectroscopy's range: {self.fetch_spectroscopy_range()[0]}V - {self.fetch_spectroscopy_range()[1]}V")
-        self.label6.configure(text=f"Curves per one point: {self.fetch_curves_per_point()}")
-        self.label7.configure(text=f"Number of points: {self.fetch_number_of_points()}")
+        functions = [f"File's name: {self.fetch_filename()}",
+                     f"Picture's size (px): {self.fetch_picture_size()[0]}x{self.fetch_picture_size()[1]}",
+                     f"Picture's size (nm): {self.fetch_picture_size()[2]}",
+                     f"Spectroscopy's first direction: {self.fetch_forward_or_backward()}",
+                     f"Spectroscopy's range: {self.fetch_spectroscopy_range()[0]}V - {self.fetch_spectroscopy_range()[1]}V",
+                     f"Curves per one point: {self.fetch_curves_per_point()}",
+                     f"Number of points: {self.fetch_number_of_points()}"]
 
-        # Showing labels
-        for label in labels:
+        labels_functions = {label:value for (label, value) in zip(self.labels, functions)}
+
+        for (label, text) in labels_functions.items():
+            label.configure(text=text)
             label.pack(expand=True)
 
         # Showing extra window
@@ -187,7 +176,6 @@ class Dataset(ttk.Notebook):
         # Layout
         self.add(self.tab_dIdU, text='dI/dU')
         self.add(self.tab_current, text='Current')
-
 
         self.pack(expand=True, fill='both')
 
