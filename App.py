@@ -147,7 +147,7 @@ class Notebook(ttk.Notebook):
         super().__init__(parent)
         # Tabs
         self.dataset = Dataset(self, file, curves_per_point, number_of_points, forward_or_backward)
-        self.plots = Plots(self, self.dataset.dataset_dIdU, self.dataset.dataset_current, curves_per_point, number_of_points)
+        self.plots = Plots(self, self.dataset.dataset_dIdU, self.dataset.dataset_current, number_of_points)
 
         # Adding Tabs to the Notebook
         self.add(self.dataset, text='Dataset')
@@ -264,94 +264,54 @@ class Dataset(ttk.Notebook):
         return main_frame
 
 
-class Plots(ttk.Notebook):
-    def __init__(self, parent, dataset_didu, dataset_current, curves_per_point, number_of_points):
+class Plots(ttk.Frame):
+    def __init__(self, parent, dataset_didu, dataset_current, number_of_points):
         super().__init__(parent)
 
         # Class variables
-        self.dataset_dIdU = dataset_didu
-        self.dataset_current = dataset_current
-        self.curves_per_point = curves_per_point
-        self.number_of_points = number_of_points
-        self.number_of_curves = curves_per_point * number_of_points
-        self.x_dIdU = self.dataset_dIdU['x']
-        self.y_dIdU = self.dataset_dIdU[self.dataset_dIdU.columns[-self.number_of_points-2:-2]]
-        self.x_current = self.dataset_dIdU['x']
-        self.y_current = self.dataset_current[self.dataset_current.columns[-self.number_of_points-2:-2]]
-        self.slider_dIdU_var = tk.IntVar(value=6)
-        self.slider_current_var = tk.IntVar(value=6)
-        self.div_didu_var = tk.BooleanVar(value=False)
-        self.div_current_var = tk.BooleanVar(value=False)
+        self.dataset_current = dataset_current.iloc[:, -number_of_points-2:-2]
+        self.dataset_didu = dataset_didu.iloc[:, -number_of_points-2:-2]
+        self.x = dataset_current['x'].values
 
         # Widgets
-        self.tab_dIdU = ttk.Frame(self)
-        self.fig_dIdU = Figure(figsize=(11, 5))
-        self.ax_dIdU = self.fig_dIdU.add_subplot(111)
-        self.plot_dIdU = FigureCanvasTkAgg(self.fig_dIdU, master=self.tab_dIdU)
-        self.toolbar_dIdU = NavigationToolbar2Tk(self.plot_dIdU, self.tab_dIdU, pack_toolbar=False)
-        self.button_dIdU = ttk.Button(self.tab_dIdU, text='Refresh',
-                                      command=lambda: self.create_plot(self.ax_dIdU, self.plot_dIdU, self.x_dIdU, self.y_dIdU, self.slider_dIdU_var, self.toolbar_dIdU, self.div_didu_var))
-        self.slider_dIdU = ttk.Scale(self.tab_dIdU, variable=self.slider_dIdU_var,
-                                     orient='horizontal', from_=6, to=35)
-        self.slider_dIdU_label = ttk.Label(self.tab_dIdU, textvariable=self.slider_dIdU_var)
-        self.checkbox_didu = ttk.Checkbutton(self.tab_dIdU, text='Show derivative', variable=self.div_didu_var, onvalue=True, offvalue=False)
+        self.create_plot_frame().pack(expand=True, fill='both')
 
-        self.tab_current = ttk.Frame(self)
-        self.fig_current = Figure(figsize=(11, 5))
-        self.ax_current = self.fig_current.add_subplot(111)
-        self.plot_current = FigureCanvasTkAgg(self.fig_current, master=self.tab_current)
-        self.toolbar_current = NavigationToolbar2Tk(self.plot_current, self.tab_current, pack_toolbar=False)
-        self.button_current = ttk.Button(self.tab_current, text='Refresh',
-                                         command=lambda: self.create_plot(self.ax_current, self.plot_current, self.x_current, self.y_current, self.slider_current_var, self.toolbar_current, self.div_current_var))
-        self.slider_current = ttk.Scale(self.tab_current, variable=self.slider_current_var,
-                                        orient='horizontal', from_=6, to=35)
-        self.slider_current_label = ttk.Label(self.tab_current, textvariable=self.slider_current_var)
-        self.checkbox_current = ttk.Checkbutton(self.tab_current, text='Show derivative', variable=self.div_current_var, onvalue=True, offvalue=False)
-
-
-        # Layout
-        #self.create_plot_current()
-        self.create_plot(self.ax_dIdU, self.plot_dIdU, self.x_dIdU, self.y_dIdU, self.slider_dIdU_var, self.toolbar_dIdU, self.div_didu_var)
-        self.create_plot(self.ax_current, self.plot_current, self.x_current, self.y_current, self.slider_current_var, self.toolbar_current, self.div_current_var)
-
-        self.button_dIdU.pack()
-        self.button_current.pack()
-        self.slider_dIdU.pack()
-        self.slider_current.pack()
-        self.slider_dIdU_label.pack()
-        self.slider_current_label.pack()
-        self.checkbox_didu.pack()
-        self.checkbox_current.pack()
-
-
-        self.add(self.tab_dIdU, text='dI/dU')
-        self.add(self.tab_current, text='Current')
 
         self.pack(expand=True, fill='both')
 
-    def create_plot(self, plot, canvas, data_x, data_y, slider_var, toolbar, is_div):
-        plot.clear()
-        for column in data_y.columns:
-            if is_div.get():
-                y = self.count_derivative(data_y, column)(data_x)
-            else:
-                y = data_y[column].values
-            y_smoothed = savgol_filter(y, slider_var.get(), 2)
-            plot.plot(data_x, y_smoothed, label=column, linewidth=0.7)
-        plot.grid(True)
-        plot.legend()
-        plot.set_xlabel('Bias [V]', fontsize=12)
-        plot.set_ylabel('dI/dU [abr. unit]', fontsize=12)
+    def create_plot_frame(self):
+        # Funkcja tworzy obiekt frame z wykresami
+        frame = ttk.Frame(self)
 
+        fig = Figure(figsize=(13, 10), dpi=100)
+        current_plot = fig.add_subplot(2, 1, 1)
+        didu_plot = fig.add_subplot(2, 1, 2)
+
+        self.draw_plot(current_plot, self.dataset_current, 'Current', 'y [A]')
+        self.draw_plot(didu_plot, self.dataset_didu, 'dI/dU', 'y [arb. unit]', True)
+
+        fig.subplots_adjust(hspace=0.5)
+
+        canvas = FigureCanvasTkAgg(fig, frame)
         canvas.draw()
-        canvas.get_tk_widget().pack()
-        toolbar.pack(anchor='w', fill=tk.X)
+        canvas.get_tk_widget().pack(expand=True, fill='both')
 
-    def count_derivative(self, y_data, column):
-        return nd.Derivative(np.poly1d(np.polyfit(self.x_dIdU, y_data[column].values, deg=9)))
+        return frame
 
+    def draw_plot(self, plot, y_data, title, yname, first_plot=False):
+        plot.clear()
 
+        for y, column in zip(y_data.values.T, y_data.columns):
+            y = savgol_filter(y, 35, 2)
+            plot.plot(self.x, y, label=column, linewidth=0.7)
 
+        plot.set_title(title)
+        plot.grid(True)
+        plot.set_ylabel(yname)
+        if first_plot:
+            plot.set_xlabel('x [V]')
+        else:
+            plot.legend()
 
 
 # Opis osi
