@@ -29,7 +29,7 @@ class App(tk.Tk):
         self.configure(menu=self.menu)
 
         # Widgets
-        self.labels = [ttk.Label(self) for x in range(7)]
+        self.labels = [ttk.Label(self) for _ in range(7)]
 
         # Extra Window
         self.extra_window = None
@@ -272,18 +272,28 @@ class Plots(ttk.Frame):
         self.dataset_current = dataset_current.iloc[:, -number_of_points-2:-2]
         self.dataset_didu = dataset_didu.iloc[:, -number_of_points-2:-2]
         self.x = dataset_current['x'].values
+        self.number_of_points = number_of_points
+
+        # Labels variables
+        self.checkbox_vars = [tk.BooleanVar(value=True) for _ in range(self.number_of_points)]
+        self.x_range = [tk.StringVar(value=f'{min(self.x)}'), tk.StringVar(value=f'{max(self.x)}')]
 
         # Widgets
-        self.create_plot_frame().pack(expand=True, fill='both')
+        self.plot_frame = self.create_plot_frame()
+        self.navigation_toolbar = self.create_navitagion_toolbar()
 
 
+
+        # Layout
+        self.plot_frame.place(relx=0, rely=0, anchor='nw', relwidth=0.66, relheight=1)
+        self.navigation_toolbar.place(relx=0.8, rely=0, anchor='nw', relwidth=1, relheight=0.3)
         self.pack(expand=True, fill='both')
 
     def create_plot_frame(self):
         # Funkcja tworzy obiekt frame z wykresami
         frame = ttk.Frame(self)
 
-        fig = Figure(figsize=(13, 10), dpi=100)
+        fig = Figure()
         current_plot = fig.add_subplot(2, 1, 1)
         didu_plot = fig.add_subplot(2, 1, 2)
 
@@ -301,9 +311,10 @@ class Plots(ttk.Frame):
     def draw_plot(self, plot, y_data, title, yname, first_plot=False):
         plot.clear()
 
-        for y, column in zip(y_data.values.T, y_data.columns):
-            y = savgol_filter(y, 35, 2)
-            plot.plot(self.x, y, label=column, linewidth=0.7)
+        for y, column, idx in zip(y_data.values.T, y_data.columns, range(len(self.checkbox_vars))):
+            if self.checkbox_vars[idx].get():
+                y = savgol_filter(y, 35, 2)
+                plot.plot(self.x, y, label=column, linewidth=0.7)
 
         plot.set_title(title)
         plot.grid(True)
@@ -313,9 +324,128 @@ class Plots(ttk.Frame):
         else:
             plot.legend()
 
+    def create_navitagion_toolbar(self):
+        frame = ttk.Frame(self)
 
-# Opis osi
-# Legenda
-# Liczenie pochodnej
+        self.create_checkboxes(frame).pack(expand=True, fill='both')
+        self.create_x_range_entries(frame).pack(expand=True, fill='both')
+        ttk.Button(frame, text='Refresh', command=self.refresh_plot).pack(expand=True, fill='both')
+        ttk.Button(frame, text='Add curves', command=self.create_adding_curves_window).pack(expand=True, fill='both')
+
+        return frame
+
+    def create_checkboxes(self, parent):
+        frame = ttk.Frame(parent)
+        ttk.Label(frame, text='Display curves:').pack(expand=True, fill='both')
+        for column, idx in zip(self.dataset_current.columns, range(len(self.checkbox_vars))):
+            ttk.Checkbutton(frame,
+                            text=f'{column}',
+                            variable=self.checkbox_vars[idx],
+                            onvalue=True,
+                            offvalue=False).pack(expand=True, fill='both')
+        return frame
+
+    def create_x_range_entries(self, parent):
+        frame = ttk.Frame(parent)
+
+        ttk.Entry(frame, textvariable=self.x_range[0]).pack(expand=True, fill='both')
+        ttk.Entry(frame, textvariable=self.x_range[1]).pack(expand=True, fill='both')
+
+        return frame
+
+    def create_adding_curves_window(self):
+        AddingCurvesWindow(self.dataset_current)
+
+
+    # Event functions
+    def refresh_plot(self):
+        self.plot_frame.pack_forget()
+        self.plot_frame = self.create_plot_frame()
+        self.plot_frame.place(relx=0, rely=0, anchor='nw', relwidth=0.66, relheight=1)
+
+    def get_entry_values(self):
+        try:
+            return [float(self.x_range[0].get()), float(self.x_range[1].get())]
+        except TypeError:
+            print('Not a digit in entry')
+            return [min(self.x), max(self.x)]
+
+
+class AddingCurvesWindow(tk.Toplevel):
+    def __init__(self, data):
+        super().__init__()
+        self.title('Adding curves')
+        self.geometry('600x300')
+
+        # Inicjalizacja danych
+        self.left_data = list(data.columns)
+        self.right_data = []
+
+        # Ramka do przechowywania widoków TreeView
+        frame = tk.Frame(self)
+        frame.pack(padx=10, pady=10)
+
+        # TreeView po lewej stronie
+        self.left_tree = ttk.Treeview(frame, columns=('Data',), show='headings')
+        self.left_tree.heading('Data', text='Curves:')
+        self.left_tree.pack(side=tk.LEFT, padx=10)
+
+        # Wypełnij TreeView po lewej stronie danymi
+        for data in self.left_data:
+            self.left_tree.insert("", "end", values=(data,))
+
+        button_frame = ttk.Frame(frame)
+        # Dodaj pasek przewijania dla TreeView po lewej stronie
+        left_scroll = ttk.Scrollbar(frame, orient="vertical", command=self.left_tree.yview)
+        left_scroll.pack(side=tk.LEFT, fill="y")
+        self.left_tree.configure(yscrollcommand=left_scroll.set)
+
+        # Przycisk do przenoszenia danych z lewej do prawej
+        move_right_button = tk.Button(button_frame, text="-->", command=self.move_right)
+        move_right_button.pack(expand=True, fill='both')
+
+        # Przycisk do przenoszenia danych z prawej do lewej
+        move_left_button = tk.Button(button_frame, text="<--", command=self.move_left)
+        move_left_button.pack(expand=True, fill='both')
+        button_frame.pack(side=tk.LEFT, padx=20)
+
+        # TreeView po prawej stronie
+        self.right_tree = ttk.Treeview(frame, columns=('Data',), show='headings')
+        self.right_tree.heading('Data', text='Curves to add:')
+        self.right_tree.pack(side=tk.RIGHT, padx=10)
+
+        # Dodaj pasek przewijania dla TreeView po prawej stronie
+        right_scroll = ttk.Scrollbar(frame, orient="vertical", command=self.right_tree.yview)
+        right_scroll.pack(side=tk.LEFT, fill="y")
+        self.right_tree.configure(yscrollcommand=right_scroll.set)
+
+    def move_right(self):
+        # Pobierz zaznaczone dane z lewej strony
+        selected_items = self.left_tree.selection()
+        for item in selected_items:
+            data = self.left_tree.item(item, 'values')[0]
+            # Przenieś dane z lewej do prawej
+            self.right_data.append(data)
+            self.right_tree.insert("", "end", values=(data,))
+            # Usuń dane z lewej
+            self.left_tree.delete(item)
+
+    def move_left(self):
+        # Pobierz zaznaczone dane z prawej strony
+        selected_items = self.right_tree.selection()
+        for item in selected_items:
+            data = self.right_tree.item(item, 'values')[0]
+            # Przenieś dane z prawej do lewej
+            self.left_data.append(data)
+            self.left_tree.insert("", "end", values=((data,)))
+            # Usuń dane z prawej
+            self.right_tree.delete(item)
+
+
+
+
+
+
+
 app = App()
 app.mainloop()
