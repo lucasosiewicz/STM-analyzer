@@ -1,16 +1,22 @@
 import pandas as pd
 import tkinter as tk
 from tkinter import ttk
+import matplotlib.pyplot as plt
+
+# Classes
+from objs.Plots import *
 
 
 class AddingCurvesWindow(tk.Toplevel):
-    def __init__(self, data):
+    def __init__(self, data, x):
         super().__init__()
         self.title('Adding curves')
         self.geometry('600x300')
 
         # Inicjalizacja danych
-        self.left_data = list(data.columns)
+        self.x = x
+        self.data = data
+        self.left_data = list(self.data.columns)
         self.right_data = []
 
         # Ramka do przechowywania widoków TreeView
@@ -51,6 +57,9 @@ class AddingCurvesWindow(tk.Toplevel):
         right_scroll.pack(side=tk.LEFT, fill="y")
         self.right_tree.configure(yscrollcommand=right_scroll.set)
 
+        # Przycisk Ok
+        self.button_ok = ttk.Button(self, text='Ok', command=self.return_curves).pack(expand=True)
+
     def move_right(self):
         # Pobierz zaznaczone dane z lewej strony
         selected_items = self.left_tree.selection()
@@ -72,3 +81,10 @@ class AddingCurvesWindow(tk.Toplevel):
             self.left_tree.insert("", "end", values=((data,)))
             # Usuń dane z prawej
             self.right_tree.delete(item)
+
+    def return_curves(self):
+        new_data = self.data[self.right_data].mean(axis=1)
+        plt.plot(self.x, new_data.values)
+        plt.xlabel('x [V]')
+        plt.ylabel('y [arb. units]')
+        plt.show()

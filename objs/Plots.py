@@ -5,6 +5,8 @@ from scipy.signal import savgol_filter
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 # Classes
+from objs.Dataset import *
+from objs.Notebook import *
 from objs.AddingCurvesWindow import *
 
 
@@ -15,6 +17,7 @@ class Plots(ttk.Frame):
         # Class variables
         self.dataset_current = dataset_current.iloc[:, -number_of_points-2:-2]
         self.dataset_didu = dataset_didu.iloc[:, -number_of_points-2:-2]
+        self.columns = list(dataset_didu.iloc[:, -number_of_points-2:-2].columns)
         self.x = dataset_current['x'].values
         self.number_of_points = number_of_points
 
@@ -30,7 +33,7 @@ class Plots(ttk.Frame):
 
         # Layout
         self.plot_frame.place(relx=0, rely=0, anchor='nw', relwidth=0.66, relheight=1)
-        self.navigation_toolbar.place(relx=0.8, rely=0, anchor='nw', relwidth=1, relheight=0.3)
+        self.navigation_toolbar.place(relx=0.8, rely=0, anchor='nw', relwidth=0.9, relheight=0.5)
         self.pack(expand=True, fill='both')
 
     def create_plot_frame(self):
@@ -55,7 +58,10 @@ class Plots(ttk.Frame):
     def draw_plot(self, plot, y_data, title, yname, first_plot=False):
         plot.clear()
 
-        for y, column, idx in zip(y_data.values.T, y_data.columns, range(len(self.checkbox_vars))):
+        y_values = y_data.values.T
+
+
+        for y, column, idx in zip(y_values, self.columns, range(len(self.checkbox_vars))):
             if self.checkbox_vars[idx].get():
                 y = savgol_filter(y, 35, 2)
                 plot.plot(self.x, y, label=column, linewidth=0.7)
@@ -71,10 +77,10 @@ class Plots(ttk.Frame):
     def create_navitagion_toolbar(self):
         frame = ttk.Frame(self)
 
-        self.create_checkboxes(frame).pack(expand=True, fill='both')
-        self.create_x_range_entries(frame).pack(expand=True, fill='both')
-        ttk.Button(frame, text='Refresh', command=self.refresh_plot).pack(expand=True, fill='both')
-        ttk.Button(frame, text='Add curves', command=self.create_adding_curves_window).pack(expand=True, fill='both')
+        self.create_checkboxes(frame).pack(fill='both')
+        self.create_x_range_entries(frame).pack(fill='both')
+        ttk.Button(frame, text='Refresh', command=self.refresh_plot).pack(fill='both')
+        ttk.Button(frame, text='Add curves', command=self.create_adding_curves_window).pack(fill='both')
 
         return frame
 
@@ -92,13 +98,13 @@ class Plots(ttk.Frame):
     def create_x_range_entries(self, parent):
         frame = ttk.Frame(parent)
 
-        ttk.Entry(frame, textvariable=self.x_range[0]).pack(expand=True, fill='both')
-        ttk.Entry(frame, textvariable=self.x_range[1]).pack(expand=True, fill='both')
+        ttk.Entry(frame, textvariable=self.x_range[0]).pack(fill='both')
+        ttk.Entry(frame, textvariable=self.x_range[1]).pack(fill='both')
 
         return frame
 
     def create_adding_curves_window(self):
-        AddingCurvesWindow(self.dataset_current)
+        AddingCurvesWindow(self.dataset_didu, self.x)
 
 
     # Event functions
@@ -113,3 +119,4 @@ class Plots(ttk.Frame):
         except TypeError:
             print('Not a digit in entry')
             return [min(self.x), max(self.x)]
+
