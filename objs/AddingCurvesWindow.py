@@ -87,4 +87,5 @@ class AddingCurvesWindow(tk.Toplevel):
         plt.plot(self.x, new_data.values)
         plt.xlabel('x [V]')
         plt.ylabel('y [arb. units]')
+        plt.grid(True)
         plt.show()

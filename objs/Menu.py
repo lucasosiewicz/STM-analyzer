@@ -8,5 +8,6 @@ class Menu(tk.Menu):
 
     def create_submenu(self, menu_name, submenu_name, function):
         submenu = tk.Menu(self, tearoff=False)
-        submenu.add_command(label=submenu_name, command=function)
+        for name, func in zip(submenu_name, function):
+            submenu.add_command(label=name, command=func)
         self.add_cascade(label=menu_name, menu=submenu)

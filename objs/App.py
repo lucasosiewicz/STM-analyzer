@@ -22,14 +22,17 @@ class App(tk.Tk):
         self.local_visibility = False
 
         # Menu
-        self.menu = Menu(self, 'File', 'Open file', self.load_file)
-        self.configure(menu=self.menu)
+        self.menu = None
 
         # Widgets
+        self.hello_button = ttk.Button(self, text='Open file', command=self.button_load_file)
         self.labels = [ttk.Label(self) for _ in range(7)]
 
         # Extra Window
         self.extra_window = None
+
+        # Layout
+        self.hello_button.pack(expand=True)
 
     def load_file(self):
         # function executing while pressing Open Button
@@ -61,6 +64,7 @@ class App(tk.Tk):
 
         # Showing extra window
         self.extra_window = ExtraWindow(self.file, self.curves_per_point, self.number_of_points, self.forward_or_backward)
+
 
     def fetch_filename(self):
         # Fetching filename
@@ -115,4 +119,21 @@ class App(tk.Tk):
         self.number_of_points = number_of_points
         return number_of_points
 
+    def button_load_file(self):
+        self.load_file()
+
+        self.menu = Menu(self,
+                         'File',
+                         ['Open new file', 'Open window'],
+                         [self.load_file, self.open_window])
+        self.configure(menu=self.menu)
+
+        self.hello_button.pack_forget()
+
+    def open_window(self):
+        if self.extra_window:
+            self.extra_window = ExtraWindow(self.file,
+                                            self.curves_per_point,
+                                            self.number_of_points,
+                                            self.forward_or_backward)
 
