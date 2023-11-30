@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 from matplotlib.figure import Figure
 from scipy.signal import savgol_filter
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -31,6 +32,7 @@ class Plots(ttk.Frame):
         self.savgol_var = tk.IntVar(value=3)
 
         # Widgets
+        self.fig = None
         self.plot_frame = self.create_plot_frame()
         self.navigation_toolbar = self.create_navitagion_toolbar()
 
@@ -46,16 +48,16 @@ class Plots(ttk.Frame):
         frame.rowconfigure(0, weight=1, uniform='a')
         frame.columnconfigure(0, weight=1, uniform='a')
 
-        fig = Figure()
-        current_plot = fig.add_subplot(2, 1, 1)
-        didu_plot = fig.add_subplot(2, 1, 2)
+        self.fig = Figure()
+        current_plot = self.fig.add_subplot(2, 1, 1)
+        didu_plot = self.fig.add_subplot(2, 1, 2)
 
         self.draw_plot(current_plot, self.dataset_current, 'Current', 'y [A]')
         self.draw_plot(didu_plot, self.dataset_didu, 'dI/dU', 'y [arb. unit]', True)
 
-        fig.subplots_adjust(hspace=0.5)
+        self.fig.subplots_adjust(hspace=0.5)
 
-        canvas = FigureCanvasTkAgg(fig, frame)
+        canvas = FigureCanvasTkAgg(self.fig, frame)
         canvas.draw()
         canvas.get_tk_widget().grid(row=0, column=0, sticky='news')
 
@@ -84,14 +86,15 @@ class Plots(ttk.Frame):
     def create_navitagion_toolbar(self):
         frame = ttk.Frame(self)
 
-        frame.rowconfigure((0,1,2,3,4,5), weight=1, uniform='a')
+        frame.rowconfigure((0,1,2,3,4,5,6), weight=1, uniform='a')
         frame.columnconfigure(0, weight=1, uniform='a')
 
         self.create_checkboxes(frame).grid(row=0, column=0, rowspan=2, sticky='news', padx=10, pady=10)
         self.create_x_range_entries(frame).grid(row=2, column=0, sticky='news', padx=10, pady=10)
         self.create_savgol_slider(frame).grid(row=3, column=0, sticky='news')
         ttk.Button(frame, text='Add curves', command=self.create_adding_curves_window).grid(row=4, column=0)
-        ttk.Button(frame, text='Refresh', command=self.refresh_plot).grid(row=5, column=0)
+        ttk.Button(frame, text='Save plot', command=self.save_plot). grid(row=5, column=0)
+        ttk.Button(frame, text='Refresh', command=self.refresh_plot).grid(row=6, column=0)
 
         return frame
 
@@ -152,3 +155,8 @@ class Plots(ttk.Frame):
             print('Not a digit in entry')
             return [min(self.x), max(self.x)]
 
+    def save_plot(self):
+        file_path = filedialog.asksaveasfilename(defaultextension=".png",
+                                                 filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
+        if file_path:
+            self.fig.savefig(file_path)
