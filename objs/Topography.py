@@ -23,18 +23,18 @@ class Topography(ttk.Frame):
         frame = ttk.Frame(self)
 
         fig = Figure()
-        for i, dataset, name in zip([1,3], [self.tf, self.tb], ['Forward', 'Backward']):
+        for i, dataset, name in zip([1,2], [self.tf, self.tb], ['Forward', 'Backward']):
             ax = fig.add_subplot(2, 2, i)
             x = dataset[f'Topography_{name}_x']
             y = dataset[f'Topography_{name}_y']
-            z = dataset.values
+            z = dataset.values * 10**9
             im = ax.pcolormesh(x, y, z)
             ax.set_title(name)
             divider = make_axes_locatable(ax)
             cax = divider.append_axes("right", size="5%", pad=0.1)
             colorbar = plt.colorbar(im, cax=cax)
 
-        for i, dataset, name in zip([2,4], [self.didu_f, self.didu_b], ['dI/dU__Forward', 'dI/dU__Backward']):
+        for i, dataset, name in zip([3,4], [self.didu_f, self.didu_b], ['dI/dU__Forward', 'dI/dU__Backward']):
             ax = fig.add_subplot(2, 2, i)
             x = dataset[f'{name}_x']
             y = dataset[f'{name}_y']
@@ -44,6 +44,8 @@ class Topography(ttk.Frame):
             divider = make_axes_locatable(ax)
             cax = divider.append_axes("right", size="5%", pad=0.1)
             colorbar = plt.colorbar(im, cax=cax)
+
+        fig.subplots_adjust(hspace=0.5, wspace=0.5)
 
         canvas = FigureCanvasTkAgg(fig, frame)
         canvas.draw()
