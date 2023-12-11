@@ -6,10 +6,10 @@ from tkinter import filedialog
 import ttkbootstrap as ttk
 
 
-class App(tk.Tk):
+class App(ttk.Window):
     # Main class
     def __init__(self):
-        super().__init__()
+        super().__init__(themename='darkly')
         self.title('Praca inżynierska')
         self.geometry('300x150')
 

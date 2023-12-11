@@ -53,6 +53,7 @@ class Plots(ttk.Frame):
         self.draw_plot(didu_plot, self.dataset_didu, 'dI/dU', 'y [arb. unit]', True)
 
         self.fig.subplots_adjust(hspace=0.5)
+        #self.fig.set_facecolor('#202020')
 
         canvas = FigureCanvasTkAgg(self.fig, frame)
         canvas.draw()

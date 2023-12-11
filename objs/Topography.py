@@ -5,6 +5,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
+
 class Topography(ttk.Frame):
     def __init__(self, parent, file):
         super().__init__(parent)
@@ -23,6 +24,7 @@ class Topography(ttk.Frame):
         frame = ttk.Frame(self)
 
         fig = Figure()
+        #plt.style.use('dark_background')
         for i, dataset, name in zip([1, 2], [self.tf, self.tb], ['Forward', 'Backward']):
             ax = fig.add_subplot(2, 3, i)
             z = dataset.values * 10**9
@@ -53,6 +55,7 @@ class Topography(ttk.Frame):
             plt.colorbar(im, cax=cax)
 
         fig.subplots_adjust(hspace=0.5, wspace=0.5)
+        #fig.set_facecolor('#202020')
 
         canvas = FigureCanvasTkAgg(fig, frame)
         canvas.draw()
