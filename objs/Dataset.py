@@ -1,26 +1,27 @@
 import numpy as np
 import pandas as pd
 import tkinter as tk
-from tkinter import ttk
+from ttkbootstrap import ttk
+
 
 class Dataset(ttk.Notebook):
     def __init__(self, parent, file, curves_per_point, number_of_points, forward_or_backward):
         super().__init__(parent)
 
         # Class variables
-        self.file = file                                                                                    # dane z pliku
-        self.curves_per_point = curves_per_point                                                            # ilość krzywych na punkt
-        self.number_of_points = number_of_points                                                            # ilość punktów
-        self.number_of_curves = self.curves_per_point * self.number_of_points                               # liczba krzywych łącznie
-        self.forward_or_backward = forward_or_backward                                                      # czy rozpoczęto od forward
-        self.intervals = np.linspace(0, self.number_of_curves, self.number_of_points + 1, dtype=int)   # tworzenie przedziałów punktowych
+        self.file = file
+        self.curves_per_point = curves_per_point
+        self.number_of_points = number_of_points
+        self.number_of_curves = self.curves_per_point * self.number_of_points
+        self.forward_or_backward = forward_or_backward
+        self.intervals = np.linspace(0, self.number_of_curves, self.number_of_points + 1, dtype=int)
 
         self.dataset_dIdU = self.create_dataset('dI/dU_')
         self.dataset_current = self.create_dataset('Current_')
 
         # Widgets
         self.tab_dIdU = self.split_points(self.dataset_dIdU)
-        self.tab_current = self.split_points(self.dataset_current)                                           # zakładka dla kanału Current
+        self.tab_current = self.split_points(self.dataset_current)
 
         # Layout
         self.add(self.tab_dIdU, text='dI/dU')
@@ -35,7 +36,7 @@ class Dataset(ttk.Notebook):
                             columns=[f'y{x}' for x in range(self.file[variable].coords[f'{variable}_y'].size)])
         data['x'] = self.file[variable].coords[f'{variable}_x']
 
-        # warunek sprawdzający od jakiego kierunku zaczynał się pomiar spektroskopii, OFF = forward, ON = backward
+        # warunek sprawdzający, od jakiego kierunku zaczynał się pomiar spektroskopii, OFF = forward, ON = backward
         i = -1 if self.forward_or_backward else 1
 
         # Liczenie średniej forward i backward dla każdego punktu

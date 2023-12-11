@@ -1,10 +1,6 @@
-import pandas as pd
 import tkinter as tk
-from tkinter import ttk
+from ttkbootstrap import ttk
 import matplotlib.pyplot as plt
-
-# Classes
-from objs.Plots import *
 
 
 class AddingCurvesWindow(tk.Toplevel):
@@ -40,11 +36,11 @@ class AddingCurvesWindow(tk.Toplevel):
 
         # Przycisk do przenoszenia danych z lewej do prawej
         move_right_button = tk.Button(button_frame, text="-->", command=self.move_right)
-        move_right_button.pack(expand=True, fill='both')
+        move_right_button.pack(expand=True, fill='both', pady=5)
 
         # Przycisk do przenoszenia danych z prawej do lewej
         move_left_button = tk.Button(button_frame, text="<--", command=self.move_left)
-        move_left_button.pack(expand=True, fill='both')
+        move_left_button.pack(expand=True, fill='both', pady=5)
         button_frame.pack(side=tk.LEFT, padx=20)
 
         # TreeView po prawej stronie
@@ -58,7 +54,7 @@ class AddingCurvesWindow(tk.Toplevel):
         self.right_tree.configure(yscrollcommand=right_scroll.set)
 
         # Przycisk Ok
-        self.button_ok = ttk.Button(self, text='Ok', command=self.return_curves).pack(expand=True)
+        ttk.Button(self, text='Ok', command=self.return_curves).pack()
 
     def move_right(self):
         # Pobierz zaznaczone dane z lewej strony
@@ -78,7 +74,7 @@ class AddingCurvesWindow(tk.Toplevel):
             data = self.right_tree.item(item, 'values')[0]
             # Przenieś dane z prawej do lewej
             self.left_data.append(data)
-            self.left_tree.insert("", "end", values=((data,)))
+            self.left_tree.insert("", "end", values=data)
             # Usuń dane z prawej
             self.right_tree.delete(item)
 

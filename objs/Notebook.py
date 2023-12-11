@@ -1,10 +1,7 @@
-import tkinter as tk
-from tkinter import ttk
-
-# Classes
 from objs.Plots import *
 from objs.Dataset import *
 from objs.Topography import *
+from ttkbootstrap import ttk
 
 
 class Notebook(ttk.Notebook):

@@ -1,5 +1,4 @@
-import tkinter as tk
-from tkinter import ttk
+from ttkbootstrap import ttk
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -12,6 +11,7 @@ class Topography(ttk.Frame):
 
         self.tf = file['Topography_Forward']
         self.tb = file['Topography_Backward']
+        self.x = self.y = self.tf['Topography_Forward_x']
         self.didu_f = file['dI/dU__Forward']
         self.didu_b = file['dI/dU__Backward']
 
@@ -23,27 +23,34 @@ class Topography(ttk.Frame):
         frame = ttk.Frame(self)
 
         fig = Figure()
-        for i, dataset, name in zip([1,2], [self.tf, self.tb], ['Forward', 'Backward']):
-            ax = fig.add_subplot(2, 2, i)
-            x = dataset[f'Topography_{name}_x']
-            y = dataset[f'Topography_{name}_y']
+        for i, dataset, name in zip([1, 2], [self.tf, self.tb], ['Forward', 'Backward']):
+            ax = fig.add_subplot(2, 3, i)
             z = dataset.values * 10**9
-            im = ax.pcolormesh(x, y, z)
+            im = ax.pcolormesh(self.x, self.y, z)
             ax.set_title(name)
             divider = make_axes_locatable(ax)
             cax = divider.append_axes("right", size="5%", pad=0.1)
-            colorbar = plt.colorbar(im, cax=cax)
+            plt.colorbar(im, cax=cax)
 
-        for i, dataset, name in zip([3,4], [self.didu_f, self.didu_b], ['dI/dU__Forward', 'dI/dU__Backward']):
-            ax = fig.add_subplot(2, 2, i)
-            x = dataset[f'{name}_x']
-            y = dataset[f'{name}_y']
+        for i, dataset, name in zip([4, 5], [self.didu_f, self.didu_b], ['dI/dU Forward', 'dI/dU Backward']):
+            ax = fig.add_subplot(2, 3, i)
             z = dataset.values
-            im = ax.pcolormesh(x, y, z)
+            im = ax.pcolormesh(self.x, self.y, z)
             ax.set_title(name)
             divider = make_axes_locatable(ax)
             cax = divider.append_axes("right", size="5%", pad=0.1)
-            colorbar = plt.colorbar(im, cax=cax)
+            plt.colorbar(im, cax=cax)
+
+        mean_topology = (self.tf.values + self.tb.values) / 2
+        mean_didu = (self.didu_f.values + self.didu_b.values) / 2
+
+        for i, z, name in zip([3, 6], [mean_topology, mean_didu], ['Mean', 'dI/dU mean']):
+            ax = fig.add_subplot(2, 3, i)
+            im = ax.pcolormesh(self.x, self.y, z)
+            ax.set_title(name)
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="5%", pad=0.1)
+            plt.colorbar(im, cax=cax)
 
         fig.subplots_adjust(hspace=0.5, wspace=0.5)
 
@@ -52,6 +59,3 @@ class Topography(ttk.Frame):
         canvas.get_tk_widget().pack(expand=True, fill='both')
 
         return frame
-
-
-

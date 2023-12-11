@@ -1,14 +1,11 @@
+from objs.AddingCurvesWindow import *
+
 import tkinter as tk
-from tkinter import ttk
+from ttkbootstrap import ttk
 from tkinter import filedialog
 from matplotlib.figure import Figure
 from scipy.signal import savgol_filter
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
-# Classes
-from objs.Dataset import *
-from objs.Notebook import *
-from objs.AddingCurvesWindow import *
 
 
 class Plots(ttk.Frame):
@@ -16,7 +13,7 @@ class Plots(ttk.Frame):
         super().__init__(parent)
 
         # Set grid
-        self.columnconfigure((0,1,2,3), weight=1, uniform='a')
+        self.columnconfigure((0, 1, 2, 3), weight=1, uniform='a')
         self.rowconfigure(0, weight=1, uniform='a')
 
         # Class variables
@@ -86,7 +83,7 @@ class Plots(ttk.Frame):
     def create_navitagion_toolbar(self):
         frame = ttk.Frame(self)
 
-        frame.rowconfigure((0,1,2,3,4,5,6), weight=1, uniform='a')
+        frame.rowconfigure((0, 1, 2, 3, 4, 5, 6), weight=1, uniform='a')
         frame.columnconfigure(0, weight=1, uniform='a')
 
         self.create_checkboxes(frame).grid(row=0, column=0, rowspan=2, sticky='news', padx=10, pady=10)
@@ -112,8 +109,8 @@ class Plots(ttk.Frame):
     def create_x_range_entries(self, parent):
         frame = ttk.Frame(parent)
 
-        frame.rowconfigure((0,1), weight=1, uniform='a')
-        frame.columnconfigure((0,1), weight=1, uniform='a')
+        frame.rowconfigure((0, 1), weight=1, uniform='a')
+        frame.columnconfigure((0, 1), weight=1, uniform='a')
 
         ttk.Label(frame, text='Set min X on axis:').grid(row=0, column=0)
         ttk.Label(frame, text='Set max X on axis:').grid(row=1, column=0)
@@ -126,7 +123,7 @@ class Plots(ttk.Frame):
         frame = ttk.Frame(parent)
 
         frame.columnconfigure(0, weight=1, uniform='a')
-        frame.rowconfigure((0,1,2), weight=1, uniform='a')
+        frame.rowconfigure((0, 1, 2), weight=1, uniform='a')
 
         ttk.Label(frame, text='Set level of smoothing plots:').grid(row=0, column=0)
         ttk.Scale(frame, variable=self.savgol_var,

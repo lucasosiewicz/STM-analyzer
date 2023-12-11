@@ -1,10 +1,9 @@
-import spym
-import tkinter as tk
-from tkinter import ttk, filedialog
-
-# Classes
 from objs.Menu import *
 from objs.ExtraWindow import *
+import spym
+import tkinter as tk
+from tkinter import filedialog
+import ttkbootstrap as ttk
 
 
 class App(tk.Tk):
@@ -52,19 +51,22 @@ class App(tk.Tk):
                      f"Picture's size (px): {self.fetch_picture_size()[0]}x{self.fetch_picture_size()[1]}",
                      f"Picture's size (nm): {self.fetch_picture_size()[2]}",
                      f"Spectroscopy's first direction: {self.fetch_forward_or_backward()}",
-                     f"Spectroscopy's range: {self.fetch_spectroscopy_range()[0]}V - {self.fetch_spectroscopy_range()[1]}V",
+                     f"Spectroscopy's range: "
+                     f"{self.fetch_spectroscopy_range()[0]}V - {self.fetch_spectroscopy_range()[1]}V",
                      f"Curves per one point: {self.fetch_curves_per_point()}",
                      f"Number of points: {self.fetch_number_of_points()}"]
 
-        labels_functions = {label:value for (label, value) in zip(self.labels, functions)}
+        labels_functions = {label: value for (label, value) in zip(self.labels, functions)}
 
         for (label, text) in labels_functions.items():
             label.configure(text=text)
             label.pack(expand=True)
 
         # Showing extra window
-        self.extra_window = ExtraWindow(self.file, self.curves_per_point, self.number_of_points, self.forward_or_backward)
-
+        self.extra_window = ExtraWindow(self.file,
+                                        self.curves_per_point,
+                                        self.number_of_points,
+                                        self.forward_or_backward)
 
     def fetch_filename(self):
         # Fetching filename
@@ -136,4 +138,3 @@ class App(tk.Tk):
                                             self.curves_per_point,
                                             self.number_of_points,
                                             self.forward_or_backward)
-
