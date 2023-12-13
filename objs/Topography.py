@@ -1,9 +1,11 @@
+import numpy as np
 from ttkbootstrap import ttk
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+# TODO pomyśleć nad tym uśrednianiem
 
 
 class Topography(ttk.Frame):
@@ -13,52 +15,79 @@ class Topography(ttk.Frame):
         self.tf = file['Topography_Forward']
         self.tb = file['Topography_Backward']
         self.x = self.y = self.tf['Topography_Forward_x']
-        self.didu_f = file['dI/dU__Forward']
-        self.didu_b = file['dI/dU__Backward']
+        try:
+            self.didu_f = file['dI/dU__Forward']
+            self.didu_b = file['dI/dU__Backward']
+            self.rows = 2
+        except KeyError:
+            self.rows = 1
 
-        self.create_topography().pack(expand=True, fill='both')
+        self.draw_plot().pack(expand=True, fill='both')
 
         self.pack(expand=True, fill='both')
 
-    def create_topography(self):
+    def create_topography(self, fig, idx, data, titles):
+
+        for i, dataset, name in zip(idx, data, titles):
+            ax = fig.add_subplot(self.rows, 3, i)
+            z = dataset
+            im = ax.pcolormesh(self.x, self.y, z)
+            ax.set_title(name)
+            ax.set_xlabel('X [m]')
+            ax.set_ylabel('Y [m]')
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="5%", pad=0.1)
+            plt.colorbar(im, cax=cax, label='Z [m]')
+
+    def draw_plot(self):
         frame = ttk.Frame(self)
-
         fig = Figure()
-        #plt.style.use('dark_background')
-        for i, dataset, name in zip([1, 2], [self.tf, self.tb], ['Forward', 'Backward']):
-            ax = fig.add_subplot(2, 3, i)
-            z = dataset.values * 10**9
-            im = ax.pcolormesh(self.x, self.y, z)
-            ax.set_title(name)
-            divider = make_axes_locatable(ax)
-            cax = divider.append_axes("right", size="5%", pad=0.1)
-            plt.colorbar(im, cax=cax)
 
-        for i, dataset, name in zip([4, 5], [self.didu_f, self.didu_b], ['dI/dU Forward', 'dI/dU Backward']):
-            ax = fig.add_subplot(2, 3, i)
-            z = dataset.values
-            im = ax.pcolormesh(self.x, self.y, z)
-            ax.set_title(name)
-            divider = make_axes_locatable(ax)
-            cax = divider.append_axes("right", size="5%", pad=0.1)
-            plt.colorbar(im, cax=cax)
+        self.create_topography(fig, idx=[1,2], data=[self.tf, self.tb], titles=['Forward', 'Backward'])
+        optimal_shift = self.find_optimal_shift([self.tf, self.tb])
+        z = self.create_mean_topography_data(optimum=optimal_shift, data=[self.tf, self.tb])
+        self.create_topography(fig, idx=[3], data=[z], titles=[f'Mean {optimal_shift}px'])
 
-        mean_topology = (self.tf.values + self.tb.values) / 2
-        mean_didu = (self.didu_f.values + self.didu_b.values) / 2
+        try:
+            self.create_topography(fig, idx=[4,5], data=[self.didu_f, self.didu_b], titles=['dI/dU Forward', 'dI/dU Backward'])
+            optimal_shift = self.find_optimal_shift([self.didu_f, self.didu_b])
+            z = self.create_mean_topography_data(optimum=optimal_shift, data=[self.didu_f, self.didu_b])
+            self.create_topography(fig, idx=[6], data=[z], titles=[f'Mean {optimal_shift}px'])
+        except AttributeError:
+            pass
 
-        for i, z, name in zip([3, 6], [mean_topology, mean_didu], ['Mean', 'dI/dU mean']):
-            ax = fig.add_subplot(2, 3, i)
-            im = ax.pcolormesh(self.x, self.y, z)
-            ax.set_title(name)
-            divider = make_axes_locatable(ax)
-            cax = divider.append_axes("right", size="5%", pad=0.1)
-            plt.colorbar(im, cax=cax)
 
-        fig.subplots_adjust(hspace=0.5, wspace=0.5)
-        #fig.set_facecolor('#202020')
 
+        fig.subplots_adjust(hspace=0.9, wspace=0.7)
         canvas = FigureCanvasTkAgg(fig, frame)
         canvas.draw()
         canvas.get_tk_widget().pack(expand=True, fill='both')
 
         return frame
+
+    def find_optimal_shift(self, data):
+        results = np.array([])
+
+        for threshold in range(-10, 11):
+            if threshold < 0:
+                sub = np.sum(np.abs(data[0].values[:, -threshold:] - data[1].values[:, :threshold]))
+            elif threshold > 0:
+                sub = np.sum(np.abs(data[0].values[:, threshold:] - data[1].values[:, :-threshold]))
+            else:
+                sub = np.sum(np.abs(data[0].values - data[1].values))
+            results = np.append(results, sub)
+
+        return results.argmin() - 10
+
+    def create_mean_topography_data(self, optimum, data):
+        if optimum < 0:
+            z = (data[0].values[:, -optimum:] + data[1].values[:, :optimum]) / 2
+            z = np.c_[z, data[1].values[:, optimum:]]
+        elif optimum > 0:
+            z = (data[0].values[:, optimum:] + data[1].values[:, :-optimum]) / 2
+            z = np.c_[data[0].values[:, :optimum], z]
+        else:
+            z = (data[0].values + data[1].values) / 2
+
+        return z
+
