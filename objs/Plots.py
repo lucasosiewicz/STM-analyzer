@@ -6,6 +6,7 @@ from tkinter import filedialog
 from matplotlib.figure import Figure
 from scipy.signal import savgol_filter
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from ttkbootstrap.scrolled import ScrolledFrame
 
 
 class Plots(ttk.Frame):
@@ -42,10 +43,7 @@ class Plots(ttk.Frame):
         # Funkcja tworzy obiekt frame z wykresami
         frame = ttk.Frame(self)
 
-        frame.rowconfigure(0, weight=1, uniform='a')
-        frame.columnconfigure(0, weight=1, uniform='a')
-
-        self.fig = Figure()
+        self.fig = Figure(figsize=(8, 7))
         current_plot = self.fig.add_subplot(2, 1, 1)
         didu_plot = self.fig.add_subplot(2, 1, 2)
 
@@ -57,7 +55,7 @@ class Plots(ttk.Frame):
 
         canvas = FigureCanvasTkAgg(self.fig, frame)
         canvas.draw()
-        canvas.get_tk_widget().grid(row=0, column=0, sticky='news')
+        canvas.get_tk_widget().place(relx=0, rely=0, relwidth=1, relheight=1)
 
         return frame
 
@@ -79,7 +77,7 @@ class Plots(ttk.Frame):
         if first_plot:
             plot.set_xlabel('x [V]')
         else:
-            plot.legend()
+            plot.legend(loc='upper right')
 
     def create_navitagion_toolbar(self):
         frame = ttk.Frame(self)
@@ -97,8 +95,8 @@ class Plots(ttk.Frame):
         return frame
 
     def create_checkboxes(self, parent):
-        frame = ttk.Frame(parent)
-        ttk.Label(frame, text='Display curves:').pack(expand=True, fill='both')
+        frame = ScrolledFrame(parent)
+        ttk.Label(frame, text='Display curves:').pack(fill='x')
         for column, idx in zip(self.dataset_current.columns, range(len(self.checkbox_vars))):
             ttk.Checkbutton(frame,
                             text=f'{column}',

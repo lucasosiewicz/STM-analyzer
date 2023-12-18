@@ -33,6 +33,7 @@ class App(ttk.Window):
         # Layout
         self.hello_button.pack(expand=True)
 
+
     def load_file(self):
         # function executing while pressing Open Button
         file_path = filedialog.askopenfilename(

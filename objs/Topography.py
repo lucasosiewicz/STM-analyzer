@@ -5,8 +5,6 @@ from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-# TODO pomyśleć nad tym uśrednianiem
-
 
 class Topography(ttk.Frame):
     def __init__(self, parent, file):
@@ -22,8 +20,9 @@ class Topography(ttk.Frame):
         except KeyError:
             self.rows = 1
 
-        self.draw_plot().pack(expand=True, fill='both')
+        self.maps = self.draw_plot()
 
+        self.maps.pack(expand=True, fill='both')
         self.pack(expand=True, fill='both')
 
     def create_topography(self, fig, idx, data, titles):
@@ -41,7 +40,7 @@ class Topography(ttk.Frame):
 
     def draw_plot(self):
         frame = ttk.Frame(self)
-        fig = Figure()
+        fig = Figure(figsize=(12, 7))
 
         self.create_topography(fig, idx=[1,2], data=[self.tf, self.tb], titles=['Forward', 'Backward'])
         optimal_shift = self.find_optimal_shift([self.tf, self.tb])
@@ -56,12 +55,12 @@ class Topography(ttk.Frame):
         except AttributeError:
             pass
 
-
-
-        fig.subplots_adjust(hspace=0.9, wspace=0.7)
+        fig.subplots_adjust(hspace=0.7, wspace=0.7)
         canvas = FigureCanvasTkAgg(fig, frame)
         canvas.draw()
-        canvas.get_tk_widget().pack(expand=True, fill='both')
+        canvas.get_tk_widget().place(relx=0, rely=0, relwidth=1, relheight=1)
+
+        plt.close(fig)
 
         return frame
 
