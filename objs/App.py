@@ -10,8 +10,8 @@ class App(ttk.Window):
     # Main class
     def __init__(self):
         super().__init__(themename='litera')
-        self.title('Praca inżynierska')
-        self.geometry('300x150')
+        self.title('STM Analyzer')
+        self.geometry('400x250')
 
         # global variables
         self.file = ''
