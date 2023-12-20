@@ -49,7 +49,6 @@ class Topography(ttk.Frame):
 
         try:
             self.create_topography(fig, idx=[4,5], data=[self.didu_f, self.didu_b], titles=['dI/dU Forward', 'dI/dU Backward'])
-            optimal_shift = self.find_optimal_shift([self.didu_f, self.didu_b])
             z = self.create_mean_topography_data(optimum=optimal_shift, data=[self.didu_f, self.didu_b])
             self.create_topography(fig, idx=[6], data=[z], titles=[f'Mean {optimal_shift}px'])
         except AttributeError:

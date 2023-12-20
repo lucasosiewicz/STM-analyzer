@@ -1,12 +1,12 @@
 from objs.AddingCurvesWindow import *
 
 import tkinter as tk
-from ttkbootstrap import ttk
+import ttkbootstrap as ttk
 from tkinter import filedialog
 from matplotlib.figure import Figure
 from scipy.signal import savgol_filter
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from ttkbootstrap.scrolled import ScrolledFrame
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 class Plots(ttk.Frame):
@@ -23,6 +23,7 @@ class Plots(ttk.Frame):
         self.columns = list(dataset_didu.iloc[:, -number_of_points-2:-2].columns)
         self.x = dataset_current['x'].values
         self.number_of_points = number_of_points
+        self.colors = []
 
         # Labels variables
         self.checkbox_vars = [tk.BooleanVar(value=True) for _ in range(self.number_of_points)]
@@ -48,10 +49,13 @@ class Plots(ttk.Frame):
         didu_plot = self.fig.add_subplot(2, 1, 2)
 
         self.draw_plot(current_plot, self.dataset_current, 'Current', 'y [A]')
+
+        for line in current_plot.get_lines():
+            self.colors.append(line.get_color())
+
         self.draw_plot(didu_plot, self.dataset_didu, 'dI/dU', 'y [arb. unit]', True)
 
         self.fig.subplots_adjust(hspace=0.5)
-        #self.fig.set_facecolor('#202020')
 
         canvas = FigureCanvasTkAgg(self.fig, frame)
         canvas.draw()
@@ -76,8 +80,8 @@ class Plots(ttk.Frame):
         plot.set_xlim(xlim_min, xlim_max)
         if first_plot:
             plot.set_xlabel('x [V]')
-        else:
-            plot.legend(loc='upper right')
+
+
 
     def create_navitagion_toolbar(self):
         frame = ttk.Frame(self)
@@ -102,7 +106,11 @@ class Plots(ttk.Frame):
                             text=f'{column}',
                             variable=self.checkbox_vars[idx],
                             onvalue=True,
-                            offvalue=False).pack(expand=True)
+                            offvalue=False).pack(fill='both')
+            canvas = tk.Canvas(frame, width=20, height=20)
+            canvas.pack(fill='both')
+            canvas.create_rectangle(0, 0, 20, 20, fill=self.colors[idx])
+
         return frame
 
     def create_x_range_entries(self, parent):

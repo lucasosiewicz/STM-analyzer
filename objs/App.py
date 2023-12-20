@@ -24,6 +24,7 @@ class App(ttk.Window):
         self.menu = None
 
         # Widgets
+        self.title_label = ttk.Label(self, text='STM-Analyzer', font=60)
         self.hello_button = ttk.Button(self, text='Open file', command=self.button_load_file)
         self.labels = [ttk.Label(self) for _ in range(7)]
 
@@ -31,8 +32,8 @@ class App(ttk.Window):
         self.extra_window = None
 
         # Layout
+        self.title_label.pack(expand=True)
         self.hello_button.pack(expand=True)
-
 
     def load_file(self):
         # function executing while pressing Open Button
@@ -145,6 +146,7 @@ class App(ttk.Window):
                          [self.load_file, self.open_window])
         self.configure(menu=self.menu)
 
+        self.title_label.pack_forget()
         self.hello_button.pack_forget()
 
     def open_window(self):
