@@ -38,4 +38,27 @@ VERY IMPORTANT!!! AT THE BEGINNING OF INSTALATION SELECT CHECKBOX "Add python.ex
 
 ![5](https://github.com/lucasosiewicz/STM-analyzer/assets/109655615/21b2d004-f2c3-476e-8fc4-e67a8e62201c)
 
-6. On a right side You can see toolbar panel. At the top You can pick curves which You want to display. Under every checkbox there is a square whose color is representative to color of curve.
+6. On a right side You can see toolbar panel. At the top You can pick curves which You want to display. Under every checkbox there is a square whose color is representative to color of curve. Furthermore there are two entry fields which You can fill with a values. They are represending left and right borders on plots. Below there is a slider which alows to smooth curves. It is possible thanks to the Savitzky-Golay filter. After the changes You should **Refresh** button to see changes on plot.
+
+7. There are two more buttons: **Add curves** and **Save plot**. When You click the first one another window will open itself. You can see list of curves that You can add to themself. To do that select curves from the left list and click button that imitates right side arrow. If You made a mistake You can pick from the right side and move out this curve by using left side arrow.
+
+***Hint:** You can add a few curves at once by holding left Ctrl and clicking curves.* 
+
+![image](https://github.com/lucasosiewicz/STM-analyzer/assets/109655615/17322d30-666e-4ca6-a13f-016235e164a1)
+
+After click Ok button You'll get a mean plot of these curves.
+
+![image](https://github.com/lucasosiewicz/STM-analyzer/assets/109655615/838e8ca6-1862-4080-9506-c759d1b4a73e)
+
+8. **Save plot** button just saving plot as *.png - You can pick a filename and path to save plot.
+
+9. Another tab **Topography** displays the topography and spectra map of the probe in forward and backward direction. Then including thermal shift app is finding optimal shift of both images (up to 10px). It is realized by summing absolute values of subtraction forward *z* value with backward *z* value. Then results for every steps are saved in array and returning minimum value -10 (because starting from -10px).
+
+![image](https://github.com/lucasosiewicz/STM-analyzer/assets/109655615/0b76f74d-2491-4e6d-96f4-28f269460ac4)
+
+
+10. You should't be worried if You haven't done spectra measurements - app would work otherwise.
+
+
+
+
