@@ -52,7 +52,7 @@ After click Ok button You'll get a mean plot of these curves.
 
 8. **Save plot** button just saving plot as *.png - You can pick a filename and path to save plot.
 
-9. Another tab **Topography** displays the topography and spectra map of the probe in forward and backward direction. Then including thermal shift app is finding optimal shift of both images (up to 10px). It is realized by summing absolute values of subtraction forward *z* value with backward *z* value. Then results for every steps are saved in array and returning minimum value -10 (because starting from -10px).
+9. Another tab **Topography** displays the topography and spectra map of the probe in forward and backward direction. Then including thermal shift app is finding optimal shift of both images (up to 10px). It is realized by summing absolute values of subtraction forward *z* value with backward *z* value. Then results for every steps are saved in array and returning index of minimum value -10 (because starting from -10px).
 
 ![image](https://github.com/lucasosiewicz/STM-analyzer/assets/109655615/0b76f74d-2491-4e6d-96f4-28f269460ac4)
 
