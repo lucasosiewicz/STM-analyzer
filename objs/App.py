@@ -108,7 +108,7 @@ class App(ttk.Window):
             self.forward_or_backward = True if f_or_b == 'OFF' else False
             return 'Forward' if f_or_b == 'OFF' else 'Backward'
         except KeyError:
-            return "Spectroscopy hasn't done in this file"
+            return "Spectroscopy hasn't made in this file"
 
     def fetch_spectroscopy_range(self):
         # Fetching spectroscopy's range by taking min and max values
@@ -126,7 +126,7 @@ class App(ttk.Window):
             self.curves_per_point = curves_per_point
             return curves_per_point
         except KeyError:
-            return "Spectroscopy hasn't done in this file"
+            return "Spectroscopy hasn't made in this file"
 
     def fetch_number_of_points(self):
         try:
@@ -135,7 +135,7 @@ class App(ttk.Window):
             self.number_of_points = number_of_points
             return number_of_points
         except KeyError:
-            return "Spectroscopy hasn't done in this file"
+            return "Spectroscopy hasn't made in this file"
 
     def button_load_file(self):
         self.load_file()

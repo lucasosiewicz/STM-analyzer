@@ -2,6 +2,7 @@ from objs.Plots import *
 from objs.Dataset import *
 from objs.Topography import *
 from ttkbootstrap import ttk
+from ttkbootstrap.dialogs import Messagebox
 
 
 class Notebook(ttk.Notebook):
@@ -17,7 +18,7 @@ class Notebook(ttk.Notebook):
             self.add(self.dataset, text='Dataset')
             self.add(self.plots, text='Plots')
         except KeyError:
-            pass
-
-        self.topography = Topography(self, file)
-        self.add(self.topography, text='Topography')
+            Messagebox.show_warning("Spectroscopy hasn't made in this file.", title='Warning')
+        finally:
+            self.topography = Topography(self, file)
+            self.add(self.topography, text='Topography')
