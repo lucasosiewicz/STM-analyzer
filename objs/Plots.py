@@ -5,6 +5,7 @@ import ttkbootstrap as ttk
 from tkinter import filedialog
 from matplotlib.figure import Figure
 from scipy.signal import savgol_filter
+from ttkbootstrap.dialogs import Messagebox
 from ttkbootstrap.scrolled import ScrolledFrame
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -50,8 +51,9 @@ class Plots(ttk.Frame):
 
         self.draw_plot(current_plot, self.dataset_current, 'Current', 'y [A]')
 
-        for line in current_plot.get_lines():
-            self.colors.append(line.get_color())
+        if len(self.colors) == 0:
+            for line in current_plot.get_lines():
+                self.colors.append(line.get_color())
 
         self.draw_plot(didu_plot, self.dataset_didu, 'dI/dU', 'y [arb. unit]', True)
 
@@ -70,9 +72,12 @@ class Plots(ttk.Frame):
         xlim_min, xlim_max = self.get_entry_values()
 
         for y, column, idx in zip(y_values, self.columns, range(len(self.checkbox_vars))):
-            if self.checkbox_vars[idx].get():
+            if self.checkbox_vars[idx].get() and len(self.colors) == 0:
                 y = savgol_filter(y, self.savgol_var.get(), 2)
                 plot.plot(self.x, y, label=column, linewidth=0.7)
+            elif self.checkbox_vars[idx].get() and len(self.colors) != 0:
+                y = savgol_filter(y, self.savgol_var.get(), 2)
+                plot.plot(self.x, y, label=column, linewidth=0.7, c=self.colors[idx])
 
         plot.set_title(title)
         plot.grid(True)
@@ -80,8 +85,6 @@ class Plots(ttk.Frame):
         plot.set_xlim(xlim_min, xlim_max)
         if first_plot:
             plot.set_xlabel('x [V]')
-
-
 
     def create_navitagion_toolbar(self):
         frame = ttk.Frame(self)
@@ -154,13 +157,14 @@ class Plots(ttk.Frame):
         try:
             return [float(self.x_range[0].get()), float(self.x_range[1].get())]
         except ValueError:
+            Messagebox.show_warning(title='Warning',
+                                    message='Provide correct values! Use typical format for float values (x.xxx).')
             self.x_range[0].set(min(self.x))
             self.x_range[1].set(max(self.x))
-            print('Not a digit in entry')
             return [min(self.x), max(self.x)]
 
     def save_plot(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".png",
-                                                 filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
+                                                 filetypes=[("PNG files", "*.png")])
         if file_path:
             self.fig.savefig(file_path)

@@ -31,7 +31,7 @@ class Dataset(ttk.Notebook):
 
     # Funkcja przetwarza dane i zwraca je w postaci DataFrame
     def create_dataset(self, variable):
-        # tworzenie obiektu df
+        # tworzenie obiektu DataFrame
         data = pd.DataFrame(self.file[variable].values,
                             columns=[f'y{x}' for x in range(self.file[variable].coords[f'{variable}_y'].size)])
         data['x'] = self.file[variable].coords[f'{variable}_x']
@@ -47,13 +47,14 @@ class Dataset(ttk.Notebook):
                 columns = data.columns[start:stop:2]
                 data[f'mean_{name}_p{idx + 1}'] = data[columns].mean(axis=1)
 
+        # Liczenie średniej dla każdego punktu pomiarowego
         for idx in range(len(self.intervals) - 1):
             start = self.intervals[idx]
             stop = self.intervals[idx + 1]
             columns = data.columns[start:stop]
             data[f'mean_p{idx + 1}'] = data[columns].mean(axis=1)
 
-        # Liczenie średniej dla każdego punktu
+        # Liczenie średniej dla każdego kierunku
         for fb, name in enumerate(['forward', 'backward'][::i]):
             start = fb + self.number_of_curves + 1
             stop = fb + self.number_of_curves + (self.number_of_points * 2) + 1
