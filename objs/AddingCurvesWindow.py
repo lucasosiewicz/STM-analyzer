@@ -1,6 +1,7 @@
 import tkinter as tk
 from ttkbootstrap import ttk
 import matplotlib.pyplot as plt
+from ttkbootstrap.dialogs import Messagebox
 
 
 class AddingCurvesWindow(tk.Toplevel):
@@ -65,6 +66,7 @@ class AddingCurvesWindow(tk.Toplevel):
             self.right_data.append(data)
             self.right_tree.insert("", "end", values=(data,))
             # Usuń dane z lewej
+            self.left_data.remove(data)
             self.left_tree.delete(item)
 
     def move_left(self):
@@ -77,11 +79,16 @@ class AddingCurvesWindow(tk.Toplevel):
             self.left_tree.insert("", "end", values=data)
             # Usuń dane z prawej
             self.right_tree.delete(item)
+            self.right_data.remove(data)
 
     def return_curves(self):
-        new_data = self.data[self.right_data].mean(axis=1)
-        plt.plot(self.x, new_data.values)
-        plt.xlabel('x [V]')
-        plt.ylabel('y [arb. units]')
-        plt.grid(True)
-        plt.show()
+        if len(self.right_data) > 0:
+            new_data = self.data[self.right_data].mean(axis=1)
+            plt.plot(self.x, new_data.values)
+            plt.xlabel('x [V]', fontsize=14)
+            plt.ylabel('y [arb. units]', fontsize=14)
+            plt.title('dI/dU', fontsize=16)
+            plt.grid(True)
+            plt.show()
+        else:
+            Messagebox.show_warning(title='Warning!', message='Warning! You have to move curves to the right side.')
