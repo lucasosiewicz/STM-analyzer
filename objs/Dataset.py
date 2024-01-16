@@ -31,36 +31,40 @@ class Dataset(ttk.Notebook):
 
     # Funkcja przetwarza dane i zwraca je w postaci DataFrame
     def create_dataset(self, variable):
-        # tworzenie obiektu DataFrame
+        # Utworzenie obiektu DataFrame i wypełnienie go danymi z pliku
         data = pd.DataFrame(self.file[variable].values,
                             columns=[f'y{x}' for x in range(self.file[variable].coords[f'{variable}_y'].size)])
         data['x'] = self.file[variable].coords[f'{variable}_x']
 
-        # warunek sprawdzający, od jakiego kierunku zaczynał się pomiar spektroskopii, OFF = forward, ON = backward
+        # Warunek sprawdzający, od jakiego kierunku zaczynał się pomiar spektroskopii, OFF = forward, ON = backward
         i = -1 if self.forward_or_backward else 1
 
-        # Liczenie średniej forward i backward dla każdego punktu
+        # Obliczanie średniej dla każdego punktu pomiarowego w każdym kierunku
         for idx in range(len(self.intervals) - 1):
+            # Oznaczenie kolumn kierunkami
             for fb, name in enumerate(['forward', 'backward'][::i]):
+                # Określenie przedziałów
                 start = fb + self.intervals[idx]
                 stop = self.intervals[idx + 1]
                 columns = data.columns[start:stop:2]
+                # Dodawanie kolumny do zbioru danych
                 data[f'mean_{name}_p{idx + 1}'] = data[columns].mean(axis=1)
 
-        # Liczenie średniej dla każdego punktu pomiarowego
+        # Obliczanie średniej dla każdego punktu pomiarowego
         for idx in range(len(self.intervals) - 1):
             start = self.intervals[idx]
             stop = self.intervals[idx + 1]
             columns = data.columns[start:stop]
             data[f'mean_p{idx + 1}'] = data[columns].mean(axis=1)
 
-        # Liczenie średniej dla każdego kierunku
+        # Obliczanie średniej ze wszystkich pomiarów w poszczególnych kierunkach
         for fb, name in enumerate(['forward', 'backward'][::i]):
             start = fb + self.number_of_curves + 1
             stop = fb + self.number_of_curves + (self.number_of_points * 2) + 1
             columns = data.columns[start:stop:2]
             data[f'mean_{name}'] = data[columns].mean(axis=1)
 
+        # Zwrócenie gotowego zbioru danych
         return data
 
     # Funkcja tworzy i zasila danymi obiekt treeview

@@ -25,7 +25,7 @@ class Topography(ttk.Frame):
         self.maps.pack(expand=True, fill='both')
         self.pack(expand=True, fill='both')
 
-    def create_topography(self, fig, idx, data, titles):
+    def create_topography(self, fig, idx, data, titles, z_label):
 
         for i, dataset, name in zip(idx, data, titles):
             ax = fig.add_subplot(self.rows, 3, i)
@@ -36,21 +36,21 @@ class Topography(ttk.Frame):
             ax.set_ylabel('Y [m]')
             divider = make_axes_locatable(ax)
             cax = divider.append_axes("right", size="5%", pad=0.1)
-            plt.colorbar(im, cax=cax, label='Z [m]')
+            plt.colorbar(im, cax=cax, label=z_label)
 
     def draw_plot(self):
         frame = ttk.Frame(self)
         fig = Figure(figsize=(12, 7))
 
-        self.create_topography(fig, idx=[1,2], data=[self.tf, self.tb], titles=['Forward', 'Backward'])
+        self.create_topography(fig, idx=[1,2], data=[self.tf, self.tb], titles=['Forward', 'Backward'], z_label='Z [m]')
         optimal_shift = self.find_optimal_shift([self.tf, self.tb])
         z = self.create_mean_topography_data(optimum=optimal_shift, data=[self.tf, self.tb])
-        self.create_topography(fig, idx=[3], data=[z], titles=[f'Mean {optimal_shift}px'])
+        self.create_topography(fig, idx=[3], data=[z], titles=[f'Mean {optimal_shift}px'], z_label='Z [m]')
 
         try:
-            self.create_topography(fig, idx=[4,5], data=[self.didu_f, self.didu_b], titles=['dI/dU Forward', 'dI/dU Backward'])
+            self.create_topography(fig, idx=[4,5], data=[self.didu_f, self.didu_b], titles=['dI/dU Forward', 'dI/dU Backward'], z_label='Z [A]')
             z = self.create_mean_topography_data(optimum=optimal_shift, data=[self.didu_f, self.didu_b])
-            self.create_topography(fig, idx=[6], data=[z], titles=[f'Mean {optimal_shift}px'])
+            self.create_topography(fig, idx=[6], data=[z], titles=[f'Mean {optimal_shift}px'], z_label='Z [A]')
         except AttributeError:
             pass
 
