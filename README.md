@@ -11,9 +11,9 @@ VERY IMPORTANT!!! AT THE BEGINNING OF INSTALATION SELECT CHECKBOX "Add python.ex
 
 3. Install Visual++ Redistributable (https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170).
 
-4. Type command: pip install -r requirements.txt.
+4. Type cd and paste path to the application.
 
-5. Type cd and paste path to the application.
+5. Type command: pip install -r requirements.txt.
 
 6. Type python main.py.
 
